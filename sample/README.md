@@ -7,14 +7,21 @@
 
 - Java 8以上
 - Maven 3.6以上
-- MySQL 5.7以上
+- Docker と Docker Compose
 
 ## セットアップ手順
 
 1. MySQLデータベースの準備：
 
 ```bash
-mysql -u root -p < src/main/resources/schema.sql
+# MySQLコンテナの起動（初回起動時にスキーマが自動的に作成されます）
+docker-compose up -d
+
+# コンテナのステータス確認
+docker-compose ps
+
+# ログの確認（必要な場合）
+docker-compose logs mysql
 ```
 
 2. プラグインのインストール：
