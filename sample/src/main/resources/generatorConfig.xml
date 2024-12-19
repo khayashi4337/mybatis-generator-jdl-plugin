@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <context id="MySQLTables" targetRuntime="MyBatis3">
+        <!-- JDLプラグインの設定 -->
+        <plugin type="com.example.mybatis.JDLGeneratorPlugin">
+            <property name="outputPath" value="src/main/resources/app.jdl"/>
+            <property name="detectRelationships" value="true"/>
+            <property name="generateValidations" value="true"/>
+        </plugin>
+
+        <!-- データベース接続設定 -->
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/blog_db"
+                        userId="root"
+                        password="root">
+        </jdbcConnection>
+
+        <!-- Java Model生成設定 -->
+        <javaModelGenerator targetPackage="com.example.model"
+                           targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <!-- マッパーXML生成設定 -->
+        <sqlMapGenerator targetPackage="mapper"
+                        targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <!-- Mapperインターフェース生成設定 -->
+        <javaClientGenerator type="XMLMAPPER"
+                           targetPackage="com.example.mapper"
+                           targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <!-- テーブル設定 -->
+        <table tableName="users" domainObjectName="User">
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="posts" domainObjectName="Post">
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="comments" domainObjectName="Comment">
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+    </context>
+</generatorConfiguration>
