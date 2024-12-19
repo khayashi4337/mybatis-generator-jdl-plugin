@@ -36,3 +36,7 @@ local.properties
 # Misc
 .DS_Store
 Thumbs.db
+
+# Generated files
+sample/src/main/resources/app.jdl
+sample/src/main/resources/mapper/
