@@ -7,8 +7,10 @@ import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -16,15 +18,20 @@ import java.util.*;
  * このプラグインは、既存のデータベーススキーマからJDLファイルを自動生成し、
  * MyBatisベースのアプリケーションからJHipsterアプリケーションへの移行を支援します。
  *
- * <p>主な機能：</p>
+ * <p>
+ * 主な機能：
+ * </p>
  * <ul>
- *   <li>データベーステーブルからJDLエンティティの自動生成</li>
- *   <li>エンティティ間のリレーションシップの検出と生成</li>
- *   <li>データベース制約からJDLバリデーションルールへの変換</li>
- *   <li>データベース型からJDL型への適切なマッピング</li>
+ * <li>データベーステーブルからJDLエンティティの自動生成</li>
+ * <li>エンティティ間のリレーションシップの検出と生成</li>
+ * <li>データベース制約からJDLバリデーションルールへの変換</li>
+ * <li>データベース型からJDL型への適切なマッピング</li>
  * </ul>
  *
- * <p>使用例：</p>
+ * <p>
+ * 使用例：
+ * </p>
+ * 
  * <pre>
  * {@code
  * <plugin type="com.example.mybatis.JDLGeneratorPlugin">
@@ -73,7 +80,7 @@ public class JDLGeneratorPlugin extends PluginAdapter {
     /**
      * モデルクラスの生成時に呼び出され、テーブル情報からJDLエンティティを生成します。
      *
-     * @param topLevelClass 生成されるモデルクラス
+     * @param topLevelClass     生成されるモデルクラス
      * @param introspectedTable データベーステーブルの情報
      * @return 常にtrue
      */
@@ -110,7 +117,7 @@ public class JDLGeneratorPlugin extends PluginAdapter {
                 if (column.getLength() > 0 && "String".equals(field.getType())) {
                     field.addValidation("maxlength", String.valueOf(column.getLength()));
                 }
-                
+
                 // 数値の範囲制約
                 if ("Integer".equals(field.getType()) || "Long".equals(field.getType())) {
                     if (column.getScale() > 0) {
@@ -200,7 +207,7 @@ public class JDLGeneratorPlugin extends PluginAdapter {
     /**
      * SQLマップファイルの生成後に呼び出され、JDLファイルを生成します。
      *
-     * @param sqlMap 生成されたXMLファイル
+     * @param sqlMap            生成されたXMLファイル
      * @param introspectedTable データベーステーブルの情報
      * @return 常にtrue
      */
@@ -216,7 +223,8 @@ public class JDLGeneratorPlugin extends PluginAdapter {
      * エンティティとリレーションシップの定義を指定されたパスに出力します。
      */
     private void generateJDLFile() {
-        try (FileWriter writer = new FileWriter(new File(outputPath))) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(
+                new FileOutputStream(new File(outputPath)), StandardCharsets.UTF_8)) {
             // エンティティの書き込み
             for (JDLEntity entity : entities.values()) {
                 writer.write(entity.toString());
@@ -225,7 +233,7 @@ public class JDLGeneratorPlugin extends PluginAdapter {
 
             // リレーションシップの書き込み
             if (!relationships.isEmpty()) {
-                writer.write("// リレーションシップ\n");
+                writer.write("// Relationships\n");
                 for (JDLRelationship relationship : relationships) {
                     writer.write(relationship.toString());
                     writer.write("\n");
@@ -300,7 +308,7 @@ public class JDLGeneratorPlugin extends PluginAdapter {
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append(name).append(" ").append(type);
-            
+
             // 基本制約
             if (required) {
                 sb.append(" required");
@@ -321,7 +329,7 @@ public class JDLGeneratorPlugin extends PluginAdapter {
                     first = false;
                 }
             }
-            
+
             return sb.toString();
         }
     }
