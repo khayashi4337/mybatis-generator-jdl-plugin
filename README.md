@@ -12,6 +12,129 @@
 - テーブルコメントからJHipster互換のエンティティ説明を生成
 - データベースインデックスに基づいてJHipsterの設定を最適化
 
+## クイックスタート
+
+### 1. 依存関係の追加
+
+Mavenプロジェクトの`pom.xml`に以下の依存関係を追加します：
+
+```xml
+<dependency>
+    <groupId>com.example.mybatis</groupId>
+    <artifactId>mybatis-generator-jdl-plugin</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+### 2. データベーススキーマの準備
+
+以下は、ブログシステムを例としたサンプルスキーマです：
+
+```sql
+-- ユーザーテーブル
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT 'ユーザー名（一意）',
+    email VARCHAR(100) NOT NULL UNIQUE COMMENT 'メールアドレス（一意）',
+    password_hash VARCHAR(255) NOT NULL COMMENT 'パスワードハッシュ',
+    first_name VARCHAR(50) COMMENT '名',
+    last_name VARCHAR(50) COMMENT '姓',
+    birth_date DATE COMMENT '生年月日',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 投稿テーブル
+CREATE TABLE posts (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL COMMENT '投稿者ID',
+    title VARCHAR(200) NOT NULL COMMENT '投稿タイトル',
+    content TEXT COMMENT '投稿内容',
+    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+
+### 3. MyBatis Generator設定
+
+`generatorConfig.xml`ファイルを作成し、以下のように設定します：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <context id="MySQLTables" targetRuntime="MyBatis3">
+        <!-- JDLプラグインの設定 -->
+        <plugin type="com.example.mybatis.JDLGeneratorPlugin">
+            <property name="outputPath" value="src/main/resources/app.jdl"/>
+            <property name="detectRelationships" value="true"/>
+            <property name="generateValidations" value="true"/>
+        </plugin>
+
+        <!-- データベース接続設定 -->
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/blog_db"
+                        userId="root"
+                        password="root">
+        </jdbcConnection>
+
+        <!-- 必要なジェネレーター設定 -->
+        <javaModelGenerator targetPackage="com.example.model"
+                           targetProject="src/main/java">
+        </javaModelGenerator>
+
+        <!-- テーブル設定 -->
+        <table tableName="users" domainObjectName="User"/>
+        <table tableName="posts" domainObjectName="Post"/>
+    </context>
+</generatorConfiguration>
+```
+
+### 4. プラグインの実行
+
+以下のMavenコマンドを実行してJDLファイルを生成します：
+
+```bash
+mvn mybatis-generator:generate
+```
+
+### 5. 生成されるJDLファイル
+
+プラグインは以下のようなJDLファイルを生成します：
+
+```jdl
+entity User {
+    username String required unique maxlength(50)
+    email String required unique maxlength(100)
+    passwordHash String required maxlength(255)
+    firstName String maxlength(50)
+    lastName String maxlength(50)
+    birthDate LocalDate
+    createdAt Instant required
+    updatedAt Instant required
+}
+
+entity Post {
+    title String required maxlength(200)
+    content TextBlob
+    status String required maxlength(20)
+    createdAt Instant required
+}
+
+// リレーションシップ
+relationship OneToMany {
+    User{posts} to Post
+}
+
+// バリデーションルール
+@UniqueConstraint("username")
+@UniqueConstraint("email")
+```
+
 ## 使用方法
 
 MyBatis Generatorの設定にプラグインを追加してください：
